@@ -69,6 +69,7 @@ tamanio d = foldMD 0 (\k v rec -> 1 + rec) (\k rec1 rec2 -> rec1 + rec2 + 1) d
 
 
 ----------------------Ejercicio 3----------------------
+{-
 podarHasta = foldMD
           (\_ _ _ -> Nil)
           (\k v r l p lorig->cortarOSeguir l p $ Entry k v $ r (l-1) p lorig)
@@ -92,22 +93,37 @@ podar long prof m = podarHasta m long prof long
 tablas :: Integer -> MultiDict Integer Integer
 tablas = undefined
 
-{-
 
 
 serialize :: (Show a, Show b) => MultiDict a b -> String
 serialize = undefined
+-}
 
+
+----------------------Ejercicio 5----------------------
 mapMD :: (a->c) -> (b->d) -> MultiDict a b -> MultiDict c d
-mapMD = undefined
+mapMD f g d = foldMD Nil (\k v d_rec -> Entry(f k) (g v) d_rec) 
+                         (\k d_rec_1 d_rec_2 -> Multi (f k) d_rec_1 d_rec_2) d 
 
---Filtra recursivamente mirando las claves de los subdiccionarios.
 filterMD :: (a->Bool) -> MultiDict a b -> MultiDict a b
-filterMD = undefined
+filterMD p d = foldMD Nil (\k v dr -> filterEntry k v dr ) (\k dr_1 dr_2 -> filterMulti k dr_1 dr_2) d
+                where {
+                      filterEntry k v dr        = if p k then Entry k v dr
+                                                  else dr;
+                      filterMulti k dr_1 dr_2 = if p k then Multi k dr_1 dr_2
+                                              else dr_2;
+                }
+
+toLowerCase :: String -> String
+toLowerCase s = map(\x->toLower x) s
+
+presentInList :: Eq a => a -> [a] -> Bool
+presentInList e ls = e `elem` ls
 
 enLexicon :: [String] -> MultiDict String b -> MultiDict String b
-enLexicon = undefined
+enLexicon arr d = filterMD (\k -> presentInList k arr ) $ mapMD toLowerCase (\v->v) d  
 
+{-
 cadena :: Eq a => b ->  [a] -> MultiDict a b
 cadena = undefined
 
