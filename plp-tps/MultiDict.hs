@@ -38,7 +38,7 @@ instance (Show a, Show b) => Show (MultiDict a b) where
 ----------------------Ejercicio 1----------------------
 foldMD :: c -> (a->b->c->c) -> (a->c->c->c) -> MultiDict a b -> c
 foldMD fn _ _ Nil = fn
-foldMD fn fe fm (Entry k v dicc) = fe k v (foldMD fn fe fm dicc) 
+foldMD fn fe fm (Entry k v dicc) = fe k v (foldMD fn fe fm dicc)
 foldMD fn fe fm (Multi k dicc1 dicc2) = fm k (foldMD fn fe fm dicc1) (foldMD fn fe fm dicc2)
 
 --Pruebas para el foldMD
@@ -59,7 +59,7 @@ recMD fn fe fm (Multi k dicc1 dicc2) = fm k dicc1 dicc2 (recMD fn fe fm dicc1) (
 
 ----------------------Ejercicio 2----------------------
 profundidad :: MultiDict a b -> Integer
-profundidad d = foldMD 0 (\k v rec -> max 1 rec) (\k rec1 rec2 -> 1 + max rec1 rec2) d 
+profundidad d = foldMD 0 (\k v rec -> max 1 rec) (\k rec1 rec2 -> 1 + max rec1 rec2) d
 
 
 
@@ -100,10 +100,22 @@ serialize = undefined
 -}
 
 
+----------------------Ejercicio 4----------------------
+
+serialize :: Show a => Show b => MultiDict a b -> String
+serialize = foldMD "[ ]" showEntry showMulti
+
+showEntry :: Show a => Show b => a -> b -> String -> String
+showEntry = (\x y z -> "[" ++ show x ++ ": " ++ show y ++ ", " ++ z ++ "]")
+
+showMulti :: Show a => a -> String -> String -> String
+showMulti = (\x y z -> "[" ++ show x ++ ": " ++ y ++ ", " ++ z ++ "]" )
+
+
 ----------------------Ejercicio 5----------------------
 mapMD :: (a->c) -> (b->d) -> MultiDict a b -> MultiDict c d
-mapMD f g d = foldMD Nil (\k v d_rec -> Entry(f k) (g v) d_rec) 
-                         (\k d_rec_1 d_rec_2 -> Multi (f k) d_rec_1 d_rec_2) d 
+mapMD f g d = foldMD Nil (\k v d_rec -> Entry(f k) (g v) d_rec)
+                         (\k d_rec_1 d_rec_2 -> Multi (f k) d_rec_1 d_rec_2) d
 
 filterMD :: (a->Bool) -> MultiDict a b -> MultiDict a b
 filterMD p d = foldMD Nil (\k v dr -> filterEntry k v dr ) (\k dr_1 dr_2 -> filterMulti k dr_1 dr_2) d
@@ -121,7 +133,7 @@ presentInList :: Eq a => a -> [a] -> Bool
 presentInList e ls = e `elem` ls
 
 enLexicon :: [String] -> MultiDict String b -> MultiDict String b
-enLexicon arr d = filterMD (\k -> presentInList k arr ) $ mapMD toLowerCase (\v->v) d  
+enLexicon arr d = filterMD (\k -> presentInList k arr ) $ mapMD toLowerCase (\v->v) d
 
 {-
 cadena :: Eq a => b ->  [a] -> MultiDict a b
@@ -139,3 +151,13 @@ definir (x:xs) v d = (recMD (\ks -> cadena v ks)
 obtener :: Eq a => [a] -> MultiDict a b -> Maybe b
 obtener = undefined
 -}
+
+
+----------------------Ejercicio 6----------------------
+
+cadena :: b -> [a] -> MultiDict a b
+cadena v = recr (error "Lista Vacia") (\x ls y -> if null ls then (Entry x v Nil) else Multi x y Nil)
+
+recr :: b -> (a -> [a] -> b -> b) -> [a] -> b
+recr z f [] = z
+recr z f (x:xs) = f x xs (recr z f xs)
