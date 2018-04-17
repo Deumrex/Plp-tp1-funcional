@@ -69,7 +69,6 @@ tamanio d = foldMD 0 (\k v rec -> 1 + rec) (\k rec1 rec2 -> rec1 + rec2 + 1) d
 
 
 ----------------------Ejercicio 3----------------------
-{-
 podarHasta = foldMD
           (\_ _ _ -> Nil)
           (\k v r l p lorig->cortarOSeguir l p $ Entry k v $ r (l-1) p lorig)
@@ -90,11 +89,25 @@ podar long prof m = podarHasta m long prof long
 
 --Dado un entero n, define las claves de n en adelante, cada una con su tabla de multiplicar.
 --Es decir, el valor asociado a la clave i es un diccionario con las claves de 1 en adelante, donde el valor de la clave j es i*j.
+armarPrimerosNiveles :: Integer -> [Integer] -> MultiDict Integer Integer
+armarPrimerosNiveles x xs = foldr (\e rec -> Entry e (e*x) rec ) Nil xs
+
+armarTabla :: Integer -> MultiDict Integer Integer
+armarTabla x = armarPrimerosNiveles x [y | y <- [1..]]
+
+listasATablas :: [Integer] -> MultiDict Integer Integer
+listasATablas xs = foldr(\x acum -> (Multi x (armarTabla x) acum) ) (Nil) xs
+
 tablas :: Integer -> MultiDict Integer Integer
-tablas = undefined
+tablas n = listasATablas [ x | x<- [n..] ]
 
 
 
+
+
+
+
+{-
 serialize :: (Show a, Show b) => MultiDict a b -> String
 serialize = undefined
 -}
