@@ -63,13 +63,12 @@ profundidad d = foldMD 0 (\k v rec -> max 1 rec) (\k rec1 rec2 -> 1 + max rec1 r
 
 
 
-tamanio :: MultiDict a b -> Integer
-tamanio d = foldMD 0 (\k v rec -> 1 + rec) (\k rec1 rec2 -> rec1 + rec2 + 1) d
+tamaño :: MultiDict a b -> Integer
+tamaño d = foldMD 0 (\k v rec -> 1 + rec) (\k rec1 rec2 -> rec1 + rec2 + 1) d
 
 
 
 ----------------------Ejercicio 3----------------------
-{-
 podarHasta = foldMD
           (\_ _ _ -> Nil)
           (\k v r l p lorig->cortarOSeguir l p $ Entry k v $ r (l-1) p lorig)
@@ -90,16 +89,17 @@ podar long prof m = podarHasta m long prof long
 
 --Dado un entero n, define las claves de n en adelante, cada una con su tabla de multiplicar.
 --Es decir, el valor asociado a la clave i es un diccionario con las claves de 1 en adelante, donde el valor de la clave j es i*j.
+
+-- crea la primera entrada con la tabla correspondiente para el diccionario de las entradas sucesivas 
+
 tablas :: Integer -> MultiDict Integer Integer
-tablas = undefined
+tablas n = Multi n (agregarTabla n 1) (tablas (n + 1))
 
+-- crea las entries para un n particular
 
-
-serialize :: (Show a, Show b) => MultiDict a b -> String
-serialize = undefined
--}
-
-
+agregarTabla:: Integer -> Integer -> MultiDict Integer Integer
+agregarTabla n cur_n = Entry cur_n (cur_n*n) (agregarTabla n (cur_n+1))
+                  
 ----------------------Ejercicio 4----------------------
 
 serialize :: Show a => Show b => MultiDict a b -> String
@@ -135,9 +135,18 @@ presentInList e ls = e `elem` ls
 enLexicon :: [String] -> MultiDict String b -> MultiDict String b
 enLexicon arr d = filterMD (\k -> presentInList k arr ) $ mapMD toLowerCase (\v->v) d
 
-{-
-cadena :: Eq a => b ->  [a] -> MultiDict a b
-cadena = undefined
+
+----------------------Ejercicio 6----------------------
+
+cadena :: b -> [a] -> MultiDict a b
+cadena v = recr (error "Lista Vacia") (\x ls y -> if null ls then (Entry x v Nil) else Multi x y Nil)
+
+recr :: b -> (a -> [a] -> b -> b) -> [a] -> b
+recr z f [] = z
+recr z f (x:xs) = f x xs (recr z f xs)
+
+
+----------------------Ejercicio 7----------------------
 
 --Agrega a un multidiccionario una cadena de claves [c1, ..., cn], una por cada nivel,
 --donde el valor asociado a cada clave es un multidiccionario con la clave siguiente, y así sucesivamente hasta
@@ -148,16 +157,18 @@ definir (x:xs) v d = (recMD (\ks -> cadena v ks)
        (\k1 m1 m2 r1 r2 (k:ks) -> if k1 == k then armarDic ks k m2 (r1 ks) else Multi k1 m1 (r2 (k:ks)))) d (x:xs)
   where armarDic ks k resto interior = if null ks then Entry k v resto else Multi k interior resto
 
+
 obtener :: Eq a => [a] -> MultiDict a b -> Maybe b
-obtener = undefined
--}
+obtener [] dicc = Nothing
+obtener [x] dicc = obtenerDef x dicc
+obtener (x:xs) dicc = obtener xs (obtenerDicc x dicc)
+
+-- obtenerAux (x:xs) dicc = foldMD (Nothing) (\k v rec -> ) (\k rec1 rec2 -> ) dicc
+
+obtenerDicc :: Eq a => a -> MultiDict a b -> MultiDict a b
+obtenerDicc c dicc = recMD Nil (\k v d rec -> rec) (\k d1 d2 rec1 rec2 -> if c == k then  d1 else rec2) dicc
+
+obtenerDef :: Eq a => a -> MultiDict a b -> Maybe b
+obtenerDef c dicc =  foldMD Nothing (\k v rec -> if c == k then  Just v else rec) (\k rec1 rec2 -> rec2) dicc
 
 
-----------------------Ejercicio 6----------------------
-
-cadena :: b -> [a] -> MultiDict a b
-cadena v = recr (error "Lista Vacia") (\x ls y -> if null ls then (Entry x v Nil) else Multi x y Nil)
-
-recr :: b -> (a -> [a] -> b -> b) -> [a] -> b
-recr z f [] = z
-recr z f (x:xs) = f x xs (recr z f xs)
