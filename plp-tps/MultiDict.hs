@@ -59,7 +59,7 @@ recMD fn fe fm (Multi k dicc1 dicc2) = fm k dicc1 dicc2 (recMD fn fe fm dicc1) (
 
 ----------------------Ejercicio 2----------------------
 profundidad :: MultiDict a b -> Integer
-profundidad d = foldMD 0 (\k v rec -> max 1 rec) (\k rec1 rec2 -> 1 + max rec1 rec2) d
+profundidad d = foldMD 0 (\k v rec -> max 1 rec) (\k rec1 rec2 -> max (rec1+1) rec2) d
 
 
 
@@ -90,14 +90,14 @@ podar long prof m = podarHasta m long prof long
 --Dado un entero n, define las claves de n en adelante, cada una con su tabla de multiplicar.
 --Es decir, el valor asociado a la clave i es un diccionario con las claves de 1 en adelante, donde el valor de la clave j es i*j.
 
--- crea la primera entrada con la tabla correspondiente para el diccionario de las entradas sucesivas 
+-- crea la primera entrada con la tabla correspondiente para el diccionario de las entradas sucesivas
 
 tablas :: Integer -> MultiDict Integer Integer
 tablas n = Multi n (agregarTabla n 1) (tablas (n + 1))
 -- crea las entries para un n particular
 agregarTabla:: Integer -> Integer -> MultiDict Integer Integer
 agregarTabla n cur_n = Entry cur_n (cur_n*n) (agregarTabla n (cur_n+1))
-                  
+
 ----------------------Ejercicio 4----------------------
 
 serialize :: Show a => Show b => MultiDict a b -> String
@@ -161,6 +161,7 @@ obtener [] dicc = Nothing
 obtener [x] dicc = obtenerDef x dicc
 obtener (x:xs) dicc = obtener xs (obtenerDicc x dicc)
 
+
 -- obtenerAux (x:xs) dicc = foldMD (Nothing) (\k v rec -> ) (\k rec1 rec2 -> ) dicc
 
 obtenerDicc :: Eq a => a -> MultiDict a b -> MultiDict a b
@@ -168,5 +169,3 @@ obtenerDicc c dicc = recMD Nil (\k v d rec -> rec) (\k d1 d2 rec1 rec2 -> if c =
 
 obtenerDef :: Eq a => a -> MultiDict a b -> Maybe b
 obtenerDef c dicc =  foldMD Nothing (\k v rec -> if c == k then  Just v else rec) (\k rec1 rec2 -> rec2) dicc
-
-
