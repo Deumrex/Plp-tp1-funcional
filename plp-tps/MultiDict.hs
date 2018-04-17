@@ -89,40 +89,12 @@ podar long prof m = podarHasta m long prof long
 
 --Dado un entero n, define las claves de n en adelante, cada una con su tabla de multiplicar.
 --Es decir, el valor asociado a la clave i es un diccionario con las claves de 1 en adelante, donde el valor de la clave j es i*j.
-<<<<<<< HEAD
-=======
-armarPrimerosNiveles :: Integer -> [Integer] -> MultiDict Integer Integer
-armarPrimerosNiveles x xs = foldr (\e rec -> Entry e (e*x) rec ) Nil xs
-
-armarTabla :: Integer -> MultiDict Integer Integer
-armarTabla x = armarPrimerosNiveles x [y | y <- [1..]]
-
-listasATablas :: [Integer] -> MultiDict Integer Integer
-listasATablas xs = foldr(\x acum -> (Multi x (armarTabla x) acum) ) (Nil) xs
-
-tablas :: Integer -> MultiDict Integer Integer
-tablas n = listasATablas [ x | x<- [n..] ]
-
-
->>>>>>> f031ae068c2799231866256e2033aa6c713fbda3
 
 -- crea la primera entrada con la tabla correspondiente para el diccionario de las entradas sucesivas 
 
-<<<<<<< HEAD
 tablas :: Integer -> MultiDict Integer Integer
 tablas n = Multi n (agregarTabla n 1) (tablas (n + 1))
-=======
-
-
-
-{-
-serialize :: (Show a, Show b) => MultiDict a b -> String
-serialize = undefined
--}
->>>>>>> f031ae068c2799231866256e2033aa6c713fbda3
-
 -- crea las entries para un n particular
-
 agregarTabla:: Integer -> Integer -> MultiDict Integer Integer
 agregarTabla n cur_n = Entry cur_n (cur_n*n) (agregarTabla n (cur_n+1))
                   
