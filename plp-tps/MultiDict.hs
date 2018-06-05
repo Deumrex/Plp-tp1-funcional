@@ -157,15 +157,15 @@ definir (x:xs) v d = (recMD (\ks -> cadena v ks)
 
 
 obtener :: Eq a => [a] -> MultiDict a b -> Maybe b
-obtener [] dicc = Nothing
-obtener [x] dicc = obtenerDef x dicc
-obtener (x:xs) dicc = obtener xs (obtenerDicc x dicc)
+obtener (x:xs) d = (recMD fn fe fm d) (x:xs) Nothing
 
+fn :: Eq a => [a] -> Maybe b -> Maybe b
+fn cs rt = if null cs && isJust rt then rt else Nothing
 
--- obtenerAux (x:xs) dicc = foldMD (Nothing) (\k v rec -> ) (\k rec1 rec2 -> ) dicc
+fe :: Eq a => a -> b -> MultiDict a b -> ([a] -> Maybe b -> Maybe b) -> [a] -> Maybe b -> Maybe b
+fe k1 v1 multi_dic rec (k:ks) rt = if k1 == k && (length ks == 0) then Just v1 else rec (k:ks) Nothing
+fe k1 v1 multi_dic rec [] rt = rec [] rt
 
-obtenerDicc :: Eq a => a -> MultiDict a b -> MultiDict a b
-obtenerDicc c dicc = recMD Nil (\k v d rec -> rec) (\k d1 d2 rec1 rec2 -> if c == k then  d1 else rec2) dicc
-
-obtenerDef :: Eq a => a -> MultiDict a b -> Maybe b
-obtenerDef c dicc =  foldMD Nothing (\k v rec -> if c == k then  Just v else rec) (\k rec1 rec2 -> rec2) dicc
+fm :: Eq a => a -> MultiDict a b -> MultiDict a b -> ([a] -> Maybe b -> Maybe b) -> ([a] -> Maybe b -> Maybe b)-> [a] -> Maybe b -> Maybe b
+fm k1 m1 m2 r1 r2 (k:ks) rt = if k1 == k then r1 ks Nothing else r2 (k:ks) Nothing
+fm k1 m1 m2 r1 r2 [] rt = rt
